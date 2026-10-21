@@ -102,4 +102,4 @@ Risk ratings are initial qualitative priorities for this project and should be r
 - The backend currently defines users and generic products; courses, grades, attendance, requests, and inbox APIs are absent.
 - The transcript uses hard-coded sample rows, so it does not demonstrate server-side grade privacy.
 - Attendance, inbox, and student-files screens are empty placeholders.
-- CI now runs backend unit tests, frontend lint/build, dependency audits, Semgrep SAST, and Gitleaks secret scanning. The first run passed backend tests, frontend lint/build, and Gitleaks. Follow-up fixes address the failed audit and Semgrep jobs; deployment configuration and production runtime controls are still absent. GitHub branch protection must be configured in repository settings.
+- CI runs backend unit tests, frontend lint/build, dependency audits, Semgrep SAST, and Gitleaks secret scanning. All six required jobs passed on draft PR #3. `main` requires a pull request, one approval, up-to-date branch, and all six checks. Deployment configuration and production runtime controls are still absent.

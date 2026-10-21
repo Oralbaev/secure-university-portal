@@ -83,7 +83,7 @@ Reviewers should check:
 
 ## 6. Current automation status
 
-The repository now contains GitHub Actions workflows for backend tests, frontend lint/build, npm dependency audits, Semgrep SAST, and Gitleaks secret scanning. The workflow files are in `.github/workflows/`. The first GitHub run passed backend tests, frontend lint/build, and Gitleaks; it exposed fixable frontend advisories and Semgrep findings. The lockfile, module loading, Dependabot cooldowns, and documented Bearer-token CSRF exception were updated; the follow-up Actions run is pending. Configure branch protection on `main` to require the named checks before merging.
+The repository now contains GitHub Actions workflows for backend tests, frontend lint/build, npm dependency audits, Semgrep SAST, and Gitleaks secret scanning. The workflow files are in `.github/workflows/`. The first GitHub run exposed fixable frontend advisories and Semgrep findings. After updating the lockfile, allowlisting module loading, adding Dependabot cooldowns, and documenting why cookie-based CSRF protection does not apply to the Bearer-token auth flow, all six required jobs passed on draft PR #3. Branch protection on `main` now requires a pull request, one approval, up-to-date branch, and all six jobs.
 
 ## 7. Ownership
 
