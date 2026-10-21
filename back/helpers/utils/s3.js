@@ -3,7 +3,19 @@ const multer = require('multer')
 const { v4: uuidv4 } = require('uuid')
 const config = require('../../config')
 
-const upload = multer({ dest: config.TEMP_FILES_DIR })
+const upload = multer({
+  dest: config.TEMP_FILES_DIR,
+  limits: {
+    fieldNameSize: 100,
+    fieldSize: 1024 * 1024,
+    fields: 30,
+    fileSize: 20 * 1024 * 1024,
+    files: 5,
+    parts: 35,
+    fieldNestingDepth: 5,
+    fieldArrayIndexLimit: 10
+  }
+})
 
 const s3 = new S3Client({
   endpoint: config.PS_CLOUD_URL,

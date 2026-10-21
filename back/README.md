@@ -1,33 +1,59 @@
 # UNINET backend
 
-Express + MongoDB (Mongoose) API for the UNINET student portal.
+Express and MongoDB (Mongoose) API for the secure university portal.
 
-## Setup
+## Local setup
 
-```sh
-cp .env.example .env   # then fill in MONGO_DB_URL and SECRET_KEY
-npm install
-npm run dev            # or: npm start
+Requirements: Node.js 22.x and a local MongoDB instance.
+
+From `back/` in PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+npm ci
+npm run dev
 ```
 
-## Structure
+Edit `.env` for local development if MongoDB or the frontend URL differs. Keep `NODE_ENV=development`. The API listens on port 5001 by default. Never use the example signing key or demo credentials in a deployed environment.
 
-- `modules/<name>/` — each module has `*.model.js`, `*.routes.js`, `*.controller.js`,
-  `*.service.js` and `*.validator.js`. Models and routes are registered automatically;
-  routes are mounted at `/api/<name>`.
-- `helpers/base-service/BaseService.js` — shared CRUD with soft delete and pagination.
-- `helpers/errors/HttpError.js` — throw this for 4xx responses; anything else becomes a 500.
+## Identity and access
 
-## Auth
+- `POST /api/users/login` accepts `{ "username": "...", "password": "..." }` and returns a JWT on successful authentication.
+- `GET /api/users/me` returns the authenticated user's public account fields.
+- `POST /api/users/change-password` verifies the current password, stores a new scrypt hash, and revokes prior tokens.
+- `POST /api/users/logout` revokes issued tokens by incrementing the user's token version.
+- `/api/users/admin/*` routes require the Admin role.
+- The user model accepts Admin, Student, Teacher, Staff, and User roles. Only administrator-specific routes currently have a dedicated role gate; teacher-specific endpoints are not implemented.
+- There is no self-registration. Create accounts through the admin API or seed scripts.
 
-Login is by phone number and SMS code:
+Passwords are hashed with a unique random salt using Node.js `crypto.scrypt`. JWTs use `SECRET_KEY`, which must be at least 32 bytes in production.
 
-1. `POST /api/users/login` `{ phoneNumber }` → `{ id }`, sends a 4-digit code
-2. `POST /api/users/check-sms` `{ id, smsCode }` → `{ token }` (JWT, expires per `JWT_EXPIRES_IN`)
-3. Send `Authorization: Bearer <token>`; `POST /api/users/logout` revokes the user's tokens
+The optional upload helper uses Multer 2.4.x with limits for file size/count, field size/count, nesting depth, and array indexes. No file-upload API route is currently implemented.
 
-Codes expire after 5 minutes, allow 5 attempts, and can be resent once a minute.
-Outside production the code is always `1234` and is printed to the console.
+## Development accounts
 
-**No SMS provider is wired up yet** — implement `helpers/utils/sms.js`. Until then,
-login in production fails with `503 SMS_NOT_CONFIGURED`.
+- `npm run seed:student` creates a local Student account only when `NODE_ENV=development`. It uses `Student123!` unless `SEED_STUDENT_PASSWORD` is set. This password is for local demo use only.
+- `npm run seed:admin` creates the first Admin. If `ADMIN_PASSWORD` is not configured, it generates and prints a temporary password once; change that password after first login.
+
+Do not run seed scripts against production data.
+
+## Validation
+
+Run the backend unit tests with:
+
+```powershell
+npm test
+```
+
+The current test suite covers password hashing, verification, and password policy. It does not replace integration tests for the HTTP API or MongoDB behavior.
+
+## Module structure
+
+- `modules/<name>/` contains module models, routes, controllers, services, and validators.
+- `helpers/base-service/BaseService.js` provides shared data access behavior.
+- `helpers/auth/` contains authentication and role middleware.
+- API routes are mounted at `/api/<module>`.
+
+## Known scope
+
+The current backend has user and generic product modules. Course, grades, attendance, inbox, and student-file APIs are not implemented. The frontend transcript uses static sample rows; it is not connected to private student records.
