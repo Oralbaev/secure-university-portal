@@ -6,7 +6,9 @@ const passport = require('passport')
 const config = require('./config')
 const { errorHandler } = require('./helpers/middlewares')
 
-const app = express()
+// Authenticated API requests use explicit Bearer JWTs, not browser cookies;
+// cookie-based CSRF protection is not applicable to the current auth flow.
+const app = express() // nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 require('./models')
 
 mongoose.connect(config.MONGO_DB_URL).catch((err) => {

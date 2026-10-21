@@ -23,12 +23,13 @@
 - Backend unit tests: 8 passing locally with `npm test`.
 - Frontend lint: passing locally with `npm run lint`.
 - Frontend production build: passing locally with `npm run build`.
-- `npm audit --audit-level=high`: 0 vulnerabilities reported for both backend and frontend lockfiles.
+- The first GitHub run found 17 fixable frontend dependency advisories. `npm audit fix` refreshed the frontend lockfile; current local audits report 0 vulnerabilities in both lockfiles.
+- The first Semgrep run found dynamic module-loading paths, a missing Dependabot cooldown, and a CSRF check that does not apply to the current explicit Bearer-token auth. Module loading is now allowlisted, Dependabot cooldowns are configured, and the auth decision is documented at the app boundary.
 - The Multer upload helper now uses the 2.4.x line and enforces finite file, field, nesting, and array-index limits.
-- GitHub Actions now defines these checks plus Semgrep and Gitleaks scans. These workflows have not yet run on GitHub because the changes are only in the local working tree.
+- GitHub Actions now defines these checks plus Semgrep and Gitleaks scans. On the first remote run, backend tests, frontend lint/build, and Gitleaks passed; frontend audit and Semgrep fixes are committed locally and await a second remote run.
 
 ## Evidence still needed
 
 1. Save the review page or approval screenshot for PR #1, if it exists. The linked GitHub page could not be opened from the current unauthenticated web view.
-2. After the new workflows are pushed through a pull request, save the Actions run showing passing jobs and a teammate approval.
+2. After the follow-up fixes are pushed, save the Actions run showing passing jobs and a teammate approval.
 3. If PR #1 had no review, create one additional small change and have another team member review and approve its pull request.
