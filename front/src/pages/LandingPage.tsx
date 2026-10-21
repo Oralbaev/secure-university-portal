@@ -15,23 +15,42 @@ import type { FormProps } from "antd"
 const { Header, Content, Footer } = Layout
 const { Title } = Typography
 type FieldType = {
-  id?: string
+  username?: string
   password?: string
-  remember?: string
+  remember?: boolean
 }
 
 const App: React.FC = () => {
   const navigate = useNavigate()
+  const [loginError, setLoginError] = React.useState("")
 
-  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-    console.log("Success:", values)
-    navigate("/dashboard")
-  }
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    setLoginError("")
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5001/api"}/users/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: values.username, password: values.password }),
+        }
+      )
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.message || result.err || "Unable to sign in")
+      }
 
-  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
-    errorInfo
-  ) => {
-    console.log("Failed:", errorInfo)
+      const storage = values.remember ? localStorage : sessionStorage
+      storage.setItem("authToken", result.token)
+      storage.setItem("authUser", JSON.stringify(result.user))
+      navigate(
+        result.user.mustChangePassword ? "/change-password" : "/dashboard"
+      )
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to sign in"
+      setLoginError(message)
+    }
   }
   return (
     <Layout style={{ height: "100vh", width: "100vw" }}>
@@ -65,17 +84,22 @@ const App: React.FC = () => {
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
             style={{ width: 300, justifyItems: "center" }}
-            initialValues={{ remember: true }}
+            initialValues={{ remember: false }}
             onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
+            {loginError && (
+              <Typography.Text type="danger">{loginError}</Typography.Text>
+            )}
             <Form.Item<FieldType>
               label="Your ID"
-              name="id"
-              rules={[{ required: true, message: "Please input your ID!" }]}
+              name="username"
+              rules={[
+                { required: true, message: "Please input your ID!" },
+                { min: 3, max: 64, message: "ID must be 3 to 64 characters" },
+              ]}
             >
-              <Input />
+              <Input maxLength={64} autoComplete="username" />
             </Form.Item>
 
             <Form.Item<FieldType>
@@ -83,9 +107,10 @@ const App: React.FC = () => {
               name="password"
               rules={[
                 { required: true, message: "Please input your password!" },
+                { min: 10, max: 128, message: "Password must be 10 to 128 characters" },
               ]}
             >
-              <Input.Password />
+              <Input.Password maxLength={128} autoComplete="current-password" />
             </Form.Item>
 
             <Form.Item<FieldType>
