@@ -18,11 +18,11 @@
 - **Security analysis:** the implementation verifies password hashes with a timing-safe comparison and invalidates prior JWTs using a token version. Remaining gaps include no login throttling, no teacher-specific routes or permissions, and no courses/grades API; grade ownership cannot be demonstrated while grades are static frontend data.
 - **Assessment:** the local history contains explicit approval evidence. It does not show automated CI/security checks at merge time.
 
-## Example 3 - Draft PR #3: Checkpoint 1 CI and security baseline
+## Example 3 - PR #3: Checkpoint 1 CI and security baseline
 
 - **Repository evidence:** [draft PR #3](https://github.com/Oralbaev/secure-university-portal/pull/3), branch `security/midterm-completion`, commit `854e4eb`.
 - **Change:** adds the missing project documentation, CI and security workflows, dependency fixes, test coverage, and Semgrep remediations.
-- **Review evidence:** this PR is still a draft and has no teammate approval yet.
+- **Review evidence:** the PR is ready for review but has no teammate approval yet.
 - **Analysis evidence:** all six required GitHub Actions jobs passed: backend tests, frontend lint/build, backend and frontend npm audit, Semgrep, and Gitleaks. The run is available at [PR #3 Actions checks](https://github.com/Oralbaev/secure-university-portal/pull/3/checks).
 - **Assessment:** automated build and security gates are verified remotely; a teammate review is still required before treating this as a complete reviewed development example.
 
