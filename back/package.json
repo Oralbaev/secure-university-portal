@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "seed:student": "node scripts/seed-student.js",
+    "seed:admin": "node scripts/seed-admin.js",
+    "migrate:users": "node scripts/migrate-users.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -5,32 +5,25 @@ const ROLES = require('./helpers/roles')
 
 const userSchema = new mongoose.Schema(
   {
-    phoneNumber: {
+    username: {
       type: String,
       required: true,
       unique: true,
       index: true,
-      minlength: 11,
-      maxlength: 11
+      sparse: true,
+      trim: true,
+      lowercase: true,
+      minlength: 3,
+      maxlength: 64
     },
+    passwordHash: { type: String, required: true, select: false },
+    email: { type: String },
+    phoneNumber: { type: String },
     firstName: {
       type: String
     },
     lastName: {
       type: String
-    },
-    smsCode: {
-      type: String
-    },
-    smsCodeExpiresAt: {
-      type: Date
-    },
-    smsAttempts: {
-      type: Number,
-      default: 0
-    },
-    smsSentAt: {
-      type: Date
     },
     tokenVersion: {
       type: Number,
@@ -44,7 +37,9 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    role: { type: String, default: ROLES.USER, enum: Object.values(ROLES) }
+    role: { type: String, default: ROLES.STUDENT, enum: Object.values(ROLES) },
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    mustChangePassword: { type: Boolean, default: false }
   },
   { timestamps }
 )
