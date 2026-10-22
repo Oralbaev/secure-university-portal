@@ -23,8 +23,8 @@
 - **Repository evidence:** [PR #3](https://github.com/Oralbaev/secure-university-portal/pull/3), branch `security/midterm-completion`, with the documented implementation commits beginning at `854e4eb`.
 - **Change:** adds the missing project documentation, CI and security workflows, dependency fixes, test coverage, and Semgrep remediations.
 - **Review evidence:** GitHub's review API shows `APPROVED` by `eskendir2006` on commit `d9d5e179d44f2a509648abb711deb86638eb2abf` at 2026-10-22 02:47 UTC. PR #3 is open and marked ready for review.
-- **Analysis evidence:** the push-triggered workflows passed all six jobs. The pull_request-triggered workflow had five passing jobs and one failed `npm audit (front)` job ([failed run](https://github.com/Oralbaev/secure-university-portal/actions/runs/39711276064)); a separate push-triggered run passed ([push run](https://github.com/Oralbaev/secure-university-portal/actions/runs/39711273069)). A local `npm audit --audit-level=high` on the same worktree reported 0 vulnerabilities. The PR merge tree was identical to the branch tree. To remove duplicate runs on feature branches, both workflows now run push checks only on `main` and use `pull_request` for feature branches; the updated workflow result is pending.
-- **Assessment:** review evidence is present; complete the example after the updated required PR checks are green. Current PR checks are available at [PR #3 Actions checks](https://github.com/Oralbaev/secure-university-portal/pull/3/checks).
+- **Analysis evidence:** the first workflow pair produced inconsistent audit results for the same tree: the push run passed six jobs while the PR run failed `npm audit (front)`. Local audits reported 0 vulnerabilities. We changed workflow triggers so feature branches run through `pull_request`, while push checks run only on `main`. All six PR checks then passed on commit `4b14a330fd5d746c3c9a89cbd88e70e9308709b0` on 2026-10-22. The live results are at [PR #3 Actions checks](https://github.com/Oralbaev/secure-university-portal/pull/3/checks).
+- **Assessment:** the review was approved on `d9d5e17`, then became stale after later commits because branch protection dismisses stale reviews. A new review was requested for the updated PR head. The final documentation commit also requires its own green PR checks.
 
 ## Current checks added for the next pull requests
 
@@ -33,8 +33,8 @@
 - The first GitHub run found 17 fixable frontend dependency advisories. `npm audit fix` refreshed the frontend lockfile; current local audits report 0 vulnerabilities in both lockfiles.
 - The first Semgrep run found dynamic module-loading paths, a missing Dependabot cooldown, and a CSRF check that does not apply to the current explicit Bearer-token auth. Module loading is now allowlisted, Dependabot cooldowns are configured, and the auth decision is documented at the app boundary.
 - The Multer upload helper now uses the 2.4.x line and enforces finite file, field, nesting, and array-index limits.
-- GitHub Actions now defines these checks plus Semgrep and Gitleaks scans. Feature branch changes are checked by the PR event; push checks run only on `main` to avoid duplicate CI on each PR update. Branch protection was previously verified to require all six jobs and one approval on `main`.
+- GitHub Actions now defines these checks plus Semgrep and Gitleaks scans. Feature branch changes are checked by the PR event; push checks run only on `main` to avoid duplicate CI on each PR update. All six PR checks passed on `4b14a33`. Branch protection requires all six jobs and one approval on `main`; approvals are dismissed when new commits arrive.
 
 ## Evidence still needed
 
-1. Confirm all six checks pass on the updated PR workflow and save that run alongside the approval evidence.
+1. Confirm all six checks pass on the final PR head and obtain a fresh approval for that head.
