@@ -29,8 +29,10 @@ require('./routes')(app)
 
 app.use(errorHandler)
 
-app.listen(config.PORT, () => {
+const host = config.NODE_ENV === 'development' ? '127.0.0.1' : '0.0.0.0'
+
+app.listen(config.PORT, host, () => {
   console.log(
-    `App listening on port ${config.PORT} on ${config.NODE_ENV} environment`
+    `App listening on ${host}:${config.PORT} on ${config.NODE_ENV} environment`
   )
 })

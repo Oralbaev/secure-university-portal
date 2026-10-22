@@ -51,3 +51,12 @@ Record the date, commit hash, expected status, actual status, and a redacted scr
 - **Result:** 16 of 16 checks passed. Anonymous `/users/me` and invalid login returned 401; Student and Teacher were denied admin user listing with 403; Admin login and user listing returned 200; Admin created a Teacher with 201; password change returned 200, invalidated the old token (401), and allowed the replacement token (200); logout returned 200 and invalidated that token (401).
 - **Credential handling:** temporary passwords, API tokens, and the JWT signing key were not printed in the recorded output or stored in the repository.
 - **Scope:** this verifies local API behavior only. The project has no configured production deployment, and no courses/grades endpoints exist.
+
+## Current workstation verification
+
+- **Date:** 2026-10-22.
+- **Database:** the local development database `uninet` answered a MongoDB ping. It contained no users before this demo; the development seed created the synthetic account `student001`.
+- **Backend:** started from `back/` against the existing local `.env`. Requests produced the expected results: anonymous `/users/me` = 401; student login and `/users/me` = 200 with role `student`; student request to `/users/admin/users` = 403; wrong password = 401.
+- **Frontend:** Vite served the app at `http://127.0.0.1:5173` with HTTP 200.
+- **Local binding:** backend development mode now listens only on `127.0.0.1`; production mode binds to `0.0.0.0` for a deployment network.
+- **Data and secrets:** only synthetic demo data was used. No token, password, or signing secret was saved in this report.

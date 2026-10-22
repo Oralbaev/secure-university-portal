@@ -15,7 +15,7 @@ This guide describes the current local development setup and the review process 
 ### Backend
 
 1. Open a terminal in `back/`.
-2. Copy `.env.example` to `.env`.
+2. If `.env` does not exist, copy `.env.example` to `.env`; keep an existing local `.env` intact.
 3. Keep `NODE_ENV=development` for local work. Set `MONGO_DB_URL` to the local MongoDB instance.
 4. Install dependencies and start the API:
 
@@ -24,7 +24,7 @@ This guide describes the current local development setup and the review process 
    npm run dev
    ```
 
-The API listens on port 5001 by default. The frontend's default API URL is `http://localhost:5001/api`.
+The API listens on `127.0.0.1:5001` in development so it is reachable only from this computer. In production it binds to `0.0.0.0` for the deployment network. The frontend's default API URL is `http://localhost:5001/api`.
 
 To create a development student, run `npm run seed:student` from `back/`. This seed is limited to development and uses a known demo password unless overridden with `SEED_STUDENT_PASSWORD`. Never use the demo account or its default password outside a local development database.
 
@@ -83,7 +83,7 @@ Reviewers should check:
 
 ## 6. Current automation status
 
-The repository now contains GitHub Actions workflows for backend tests, frontend lint/build, npm dependency audits, Semgrep SAST, and Gitleaks secret scanning. The workflow files are in `.github/workflows/`. On feature branches, checks run for pull requests; push-triggered checks run on `main`. This avoids running the same six jobs twice for every feature-branch push and PR update. The first GitHub run exposed fixable frontend advisories and Semgrep findings. After updating the lockfile, allowlisting module loading, adding Dependabot cooldowns, and documenting why cookie-based CSRF protection does not apply to the Bearer-token auth flow, local tests, lint/build, and dependency audits passed on 2026-10-22. All six PR checks passed on `4b14a33`; the final documentation commit triggers a fresh set of checks. Branch protection on `main` requires a pull request, one approval, an up-to-date branch, and all six jobs, and dismisses stale approvals.
+The repository now contains GitHub Actions workflows for backend tests, frontend lint/build, npm dependency audits, Semgrep SAST, and Gitleaks secret scanning. The workflow files are in `.github/workflows/`. On feature branches, checks run for pull requests; push-triggered checks run on `main`. This avoids running the same six jobs twice for every feature-branch push and PR update. The first GitHub run exposed fixable frontend advisories and Semgrep findings. After updating the lockfile, allowlisting module loading, adding Dependabot cooldowns, and documenting why cookie-based CSRF protection does not apply to the Bearer-token auth flow, local tests, lint/build, and dependency audits passed on 2026-10-22. All six PR checks passed on commit `0e10cae`; a later local security change binds the development API to loopback, so use the live PR checks link for the current head. Branch protection on `main` requires a pull request, one approval, an up-to-date branch, and all six jobs, and dismisses stale approvals.
 
 ## 7. Ownership
 

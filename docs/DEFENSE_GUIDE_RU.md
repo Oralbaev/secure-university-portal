@@ -47,7 +47,7 @@
 
 ```powershell
 cd B:\KBTU\7_Sem\SSSD\secure-university-portal\back
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm ci
 npm run seed:student
 npm run seed:admin
@@ -68,7 +68,7 @@ npm ci
 npm run dev
 ```
 
-Откройте адрес, который напечатает Vite; обычно это `http://localhost:5173`. API по умолчанию находится на `http://localhost:5001/api`.
+Откройте адрес, который напечатает Vite; обычно это `http://localhost:5173`. API в dev-режиме привязан только к `127.0.0.1:5001` и недоступен с других компьютеров по сети.
 
 ### Если не запускается
 
