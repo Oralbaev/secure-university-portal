@@ -15,38 +15,55 @@ import Profile from "../pages/Profile"
 import ChangePassword from "../pages/ChangePassword"
 
 const ProtectedRoutes = () => {
-  const [authorized, setAuthorized] = useState<boolean | null>(null)
-  const [mustChangePassword, setMustChangePassword] = useState(false)
+  const [access, setAccess] = useState<{
+    pathname: string
+    authorized: boolean | null
+    mustChangePassword: boolean
+  }>({ pathname: "", authorized: null, mustChangePassword: false })
   const location = useLocation()
 
   useEffect(() => {
-    setAuthorized(null)
+    let cancelled = false
+    const pathname = location.pathname
     const token =
       localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
-    if (!token) {
-      setAuthorized(false)
-      return
-    }
 
-    fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5001/api"}/users/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error("Session expired")
-        return response.json()
-      })
+    const sessionRequest = token
+      ? fetch(
+          `${import.meta.env.VITE_API_URL || "http://localhost:5001/api"}/users/me`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        ).then((response) => {
+          if (!response.ok) throw new Error("Session expired")
+          return response.json()
+        }).then((result) => ({
+          authorized: true,
+          mustChangePassword: Boolean(result.user?.mustChangePassword),
+        }))
+      : Promise.resolve({ authorized: false, mustChangePassword: false })
+
+    sessionRequest
       .then((result) => {
-        setMustChangePassword(Boolean(result.user?.mustChangePassword))
-        setAuthorized(true)
+        if (!cancelled) setAccess({ pathname, ...result })
       })
       .catch(() => {
         localStorage.removeItem("authToken")
         localStorage.removeItem("authUser")
         sessionStorage.removeItem("authToken")
         sessionStorage.removeItem("authUser")
-        setAuthorized(false)
+        if (!cancelled) {
+          setAccess({ pathname, authorized: false, mustChangePassword: false })
+        }
       })
+    return () => {
+      cancelled = true
+    }
   }, [location.pathname])
+
+  const currentAccess =
+    access.pathname === location.pathname
+      ? access
+      : { pathname: location.pathname, authorized: null, mustChangePassword: false }
+  const { authorized, mustChangePassword } = currentAccess
 
   if (authorized === null) return null
   if (authorized && mustChangePassword && location.pathname !== "/change-password") {

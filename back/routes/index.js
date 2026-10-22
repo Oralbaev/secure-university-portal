@@ -1,17 +1,14 @@
-const fs = require('fs')
-const path = require('path')
-
-const modulesDirectory = path.join(__dirname, '../modules')
-const moduleFiles = fs.readdirSync(modulesDirectory)
+// Keep route modules explicit so request data or filesystem entries can never
+// influence which server code is loaded.
+const routeModules = [
+  require('../modules/products/products.routes'),
+  require('../modules/users/users.routes'),
+]
 
 module.exports = (app) => {
-  moduleFiles.forEach((file) => {
-    const filePath = path.join(modulesDirectory, file, `${file}.routes.js`)
-    if (fs.existsSync(filePath)) {
-      const routes = require(filePath)
-      if (routes) {
-        app.use(`/api/${routes.name}`, routes.router)
-      }
+  routeModules.forEach((routes) => {
+    if (routes) {
+      app.use(`/api/${routes.name}`, routes.router)
     }
   })
 }
