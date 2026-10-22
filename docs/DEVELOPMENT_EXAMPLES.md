@@ -1,6 +1,6 @@
 # Development and Review Examples
 
-**Status:** verified against local Git history and GitHub pull-request review records.
+**Status:** verified against local Git history and GitHub pull-request review records at the time of the recorded checks. Check the live pull request before presenting its current state.
 
 ## Example 1 - PR #1: Initial Backend Structure
 
@@ -20,10 +20,10 @@
 
 ## Example 3 - PR #3: Checkpoint 1 CI and security baseline
 
-- **Repository evidence:** [draft PR #3](https://github.com/Oralbaev/secure-university-portal/pull/3), branch `security/midterm-completion`, commit `854e4eb`.
+- **Repository evidence:** [PR #3](https://github.com/Oralbaev/secure-university-portal/pull/3), branch `security/midterm-completion`, with the documented implementation commits beginning at `854e4eb`.
 - **Change:** adds the missing project documentation, CI and security workflows, dependency fixes, test coverage, and Semgrep remediations.
 - **Review evidence:** the PR is ready for review but has no teammate approval yet.
-- **Analysis evidence:** all six required GitHub Actions jobs passed: backend tests, frontend lint/build, backend and frontend npm audit, Semgrep, and Gitleaks. The run is available at [PR #3 Actions checks](https://github.com/Oralbaev/secure-university-portal/pull/3/checks).
+- **Analysis evidence:** the recorded GitHub Actions run passed all six jobs: backend tests, frontend lint/build, backend and frontend npm audit, Semgrep, and Gitleaks. The live results are available at [PR #3 Actions checks](https://github.com/Oralbaev/secure-university-portal/pull/3/checks).
 - **Assessment:** automated build and security gates are verified remotely; a teammate review is still required before treating this as a complete reviewed development example.
 
 ## Current checks added for the next pull requests
@@ -35,8 +35,8 @@
 - The first GitHub run found 17 fixable frontend dependency advisories. `npm audit fix` refreshed the frontend lockfile; current local audits report 0 vulnerabilities in both lockfiles.
 - The first Semgrep run found dynamic module-loading paths, a missing Dependabot cooldown, and a CSRF check that does not apply to the current explicit Bearer-token auth. Module loading is now allowlisted, Dependabot cooldowns are configured, and the auth decision is documented at the app boundary.
 - The Multer upload helper now uses the 2.4.x line and enforces finite file, field, nesting, and array-index limits.
-- GitHub Actions now defines these checks plus Semgrep and Gitleaks scans. After fixes for the first run, all six required jobs passed on draft PR #3. Branch protection now requires all six jobs and one approval on `main`.
+- GitHub Actions now defines these checks plus Semgrep and Gitleaks scans. The recorded run on PR #3 passed all six required jobs. Branch protection was verified to require all six jobs and one approval on `main`.
 
 ## Evidence still needed
 
-1. Obtain a teammate approval on draft PR #3 and save the review evidence alongside its passing Actions run.
+1. Obtain a teammate approval on PR #3 (if it is still open) and save the review evidence alongside its passing Actions run.
