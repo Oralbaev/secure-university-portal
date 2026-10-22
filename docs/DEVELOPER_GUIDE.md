@@ -83,7 +83,7 @@ Reviewers should check:
 
 ## 6. Current automation status
 
-The repository now contains GitHub Actions workflows for backend tests, frontend lint/build, npm dependency audits, Semgrep SAST, and Gitleaks secret scanning. The workflow files are in `.github/workflows/`. The first GitHub run exposed fixable frontend advisories and Semgrep findings. After updating the lockfile, allowlisting module loading, adding Dependabot cooldowns, and documenting why cookie-based CSRF protection does not apply to the Bearer-token auth flow, all six required jobs passed on draft PR #3. Branch protection on `main` now requires a pull request, one approval, up-to-date branch, and all six jobs.
+The repository now contains GitHub Actions workflows for backend tests, frontend lint/build, npm dependency audits, Semgrep SAST, and Gitleaks secret scanning. The workflow files are in `.github/workflows/`. The first GitHub run exposed fixable frontend advisories and Semgrep findings. After updating the lockfile, allowlisting module loading, adding Dependabot cooldowns, and documenting why cookie-based CSRF protection does not apply to the Bearer-token auth flow, the push-triggered run on PR head `d9d5e17` passed all six jobs. The pull_request-triggered run had one failed `npm audit (front)` job and five passing jobs; a local audit of the same worktree reported zero vulnerabilities. Inspect/rerun the failed PR check before treating the gate as green. Branch protection on `main` was verified to require a pull request, one approval, an up-to-date branch, and all six jobs.
 
 ## 7. Ownership
 
