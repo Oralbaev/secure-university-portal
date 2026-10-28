@@ -2,6 +2,10 @@
 
 React 19 + TypeScript + Vite + Ant Design student portal.
 
+The login form uses the backend at `http://localhost:5001/api` by default.
+Set `VITE_API_URL` to override that base URL. For a local demo account, start
+MongoDB and the backend, then run `npm run seed:student` from `back/`.
+
 ```sh
 npm install
 npm run dev     # http://localhost:5173

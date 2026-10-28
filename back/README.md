@@ -5,7 +5,7 @@ Express + MongoDB (Mongoose) API for the UNINET student portal.
 ## Setup
 
 ```sh
-cp .env.example .env   # then fill in MONGO_DB_URL and SECRET_KEY
+cp .env.example .env   # fill in MONGO_DB_URL and generate SECRET_KEY with openssl rand -hex 32
 npm install
 npm run dev            # or: npm start
 ```
@@ -20,14 +20,19 @@ npm run dev            # or: npm start
 
 ## Auth
 
-Login is by phone number and SMS code:
+Accounts are provisioned; there is no public registration. Login uses
+`POST /api/users/login` with `{ username, password }`. Passwords are stored as
+salted scrypt hashes, and successful login returns a JWT. Send it as
+`Authorization: Bearer <token>`. `POST /api/users/logout` revokes prior tokens.
 
-1. `POST /api/users/login` `{ phoneNumber }` → `{ id }`, sends a 4-digit code
-2. `POST /api/users/check-sms` `{ id, smsCode }` → `{ token }` (JWT, expires per `JWT_EXPIRES_IN`)
-3. Send `Authorization: Bearer <token>`; `POST /api/users/logout` revokes the user's tokens
+For local development, run `npm run seed:student` after starting MongoDB. It
+creates `student001` / `Student123!` once. Override these with
+`SEED_STUDENT_USERNAME` and `SEED_STUDENT_PASSWORD`; the seed refuses to run
+outside development or overwrite an existing account. Set `VITE_API_URL` in the
+frontend to change the API base URL (defaults to `http://localhost:5001/api`).
 
-Codes expire after 5 minutes, allow 5 attempts, and can be resent once a minute.
-Outside production the code is always `1234` and is printed to the console.
-
-**No SMS provider is wired up yet** — implement `helpers/utils/sms.js`. Until then,
-login in production fails with `503 SMS_NOT_CONFIGURED`.
+Create the first administrator with `ADMIN_USERNAME` and `ADMIN_PASSWORD` set,
+then run `npm run seed:admin`. Authenticated admins can provision and manage
+accounts under `/api/users/admin/users`. Existing phone/SMS records can be
+converted with `npm run migrate:users`; each converted account needs an admin
+password reset before its owner can sign in.
