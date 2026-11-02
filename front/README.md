@@ -12,5 +12,6 @@ npm run lint
 Pages live in `src/pages/`, routes in `src/router/router.tsx`. The dashboard's
 active section is kept in the `?section=` query parameter.
 
-The UI currently uses hard-coded sample data and is not yet connected to the
-backend in `../back`.
+The transcript page reads the authenticated student's grades from
+`GET /api/grades/me`, and the profile page reads `GET /api/users/me`. Other
+pages still use local sample data or placeholders.

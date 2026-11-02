@@ -3,6 +3,8 @@
 const routeModules = [
   require('../modules/products/products.routes'),
   require('../modules/users/users.routes'),
+  require('../modules/courses/courses.routes'),
+  require('../modules/grades/grades.routes')
 ]
 
 module.exports = (app) => {

@@ -6,6 +6,8 @@ const mongoosePaginate = require('mongoose-paginate-v2')
 const models = [
   require('../modules/products/products.model'),
   require('../modules/users/users.model'),
+  require('../modules/courses/courses.model'),
+  require('../modules/grades/grades.model')
 ]
 
 models.forEach((model) => {

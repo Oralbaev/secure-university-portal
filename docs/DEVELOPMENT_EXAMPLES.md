@@ -15,7 +15,7 @@
 - **Repository evidence:** merge commit `75e7c185611e9c85b022591520597cbec37bc3a2`, titled `Merge pull request #2: Add authentication and role-based access control`; merged to `main` on 2026-10-21.
 - **Change:** added salted scrypt password hashing, JWT login, Student/Admin role checks, admin user-management endpoints, seed scripts, and protected frontend routes.
 - **Review evidence:** [GitHub review record](https://github.com/Oralbaev/secure-university-portal/pull/2#pullrequestreview-5604496004) shows `APPROVED` by `eskendir2006`.
-- **Security analysis:** the implementation verifies password hashes with a timing-safe comparison and invalidates prior JWTs using a token version. Remaining gaps include no login throttling, no teacher-specific routes or permissions, and no courses/grades API; grade ownership cannot be demonstrated while grades are static frontend data.
+- **Security analysis:** the implementation verifies password hashes with a timing-safe comparison and invalidates prior JWTs using a token version. At the time of this review, remaining gaps included no login throttling, no teacher-specific routes or permissions, and no courses/grades API. The later academic-records change added courses/grades with record-level authorization; login throttling remains open.
 - **Assessment:** the local history contains explicit approval evidence. It does not show automated CI/security checks at merge time.
 
 ## Example 3 - PR #3: Checkpoint 1 CI and security baseline

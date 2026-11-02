@@ -28,6 +28,8 @@ The API listens on `127.0.0.1:5001` in development so it is reachable only from 
 
 To create a development student, run `npm run seed:student` from `back/`. This seed is limited to development and uses a known demo password unless overridden with `SEED_STUDENT_PASSWORD`. Never use the demo account or its default password outside a local development database.
 
+After the student seed, run `npm run seed:academics` from `back/` to create the demo courses and grades used by the transcript page. The academic seed is idempotent, is limited to development, and can attach an existing teacher with `SEED_TEACHER_USERNAME`.
+
 The admin bootstrap script is `npm run seed:admin`. It generates a temporary password if `ADMIN_PASSWORD` is not set and prints that password once. Store it in an approved password manager and change it at first login. Do not paste it into chat, an issue, a pull request, or source code.
 
 ### Frontend
@@ -49,7 +51,7 @@ The current frontend scripts include:
 - `npm run lint`
 - `npm run build`
 
-Run them from `front/` before opening a pull request. The backend uses Node's built-in test runner; run `npm test` from `back/`. Tests cover password hashing, verification, generated temporary passwords, the password length policy, and Admin route authorization. API and database integration tests remain future work.
+Run them from `front/` before opening a pull request. The backend uses Node's built-in test runner; run `npm test` from `back/`. Tests cover password hashing, verification, generated temporary passwords, the password length policy, Admin route authorization, grade-scale calculations, and student/teacher/admin grade-access rules. API and database integration tests remain future work.
 
 ## 3. Secrets and local data
 
