@@ -13,6 +13,7 @@ Secure university management system with DevSecOps practices.
 - [Developer Guide](docs/DEVELOPER_GUIDE.md)
 - [Development and review examples](docs/DEVELOPMENT_EXAMPLES.md)
 - [Identity management demonstration](docs/IDENTITY_DEMO.md)
+- [Academic records demonstration](docs/ACADEMIC_RECORDS_DEMO.md)
 
 ## Application folders
 

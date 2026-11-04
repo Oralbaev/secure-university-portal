@@ -8,6 +8,7 @@
     "dev": "node --watch index.js",
     "seed:student": "node scripts/seed-student.js",
     "seed:admin": "node scripts/seed-admin.js",
+    "seed:academics": "node scripts/seed-academics.js",
     "migrate:users": "node scripts/migrate-users.js",
     "test": "node --test"
   },
@@ -33,6 +34,6 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "uuid": "^11.0.3",
-    "zod": "^3.23.8"
+    "zod": "^4.6.7"
   }
 }

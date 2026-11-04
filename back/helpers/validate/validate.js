@@ -8,7 +8,9 @@ const validate = (schema) => async (req, res, next) => {
 
     return next()
   } catch (error) {
-    return res.status(400).json(error)
+    // Send the issue list explicitly: zod 4 no longer serializes ZodError
+    // through JSON.stringify with the structured `issues` field.
+    return res.status(400).json({ name: error.name, issues: error.issues })
   }
 }
 

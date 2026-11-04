@@ -50,7 +50,7 @@ Record the date, commit hash, expected status, actual status, and a redacted scr
 - **Database:** disposable MongoDB 8.2.6 memory-server instance with synthetic accounts; no real student data.
 - **Result:** 16 of 16 checks passed. Anonymous `/users/me` and invalid login returned 401; Student and Teacher were denied admin user listing with 403; Admin login and user listing returned 200; Admin created a Teacher with 201; password change returned 200, invalidated the old token (401), and allowed the replacement token (200); logout returned 200 and invalidated that token (401).
 - **Credential handling:** temporary passwords, API tokens, and the JWT signing key were not printed in the recorded output or stored in the repository.
-- **Scope:** this verifies local API behavior only. The project has no configured production deployment, and no courses/grades endpoints exist.
+- **Scope:** this verifies local API behavior only. The project has no configured production deployment, and this identity demo does not cover the later academic-records feature.
 
 ## Current workstation verification
 

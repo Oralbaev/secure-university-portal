@@ -1,13 +1,13 @@
 # Architecture and Threat Model
 
-**Status:** checkpoint-1 working document
-**Scope:** current repository snapshot on branch `security/midterm-completion`
+**Status:** checkpoint-2 working document
+**Scope:** current repository snapshot on branch `main`
 **Method:** asset and trust-boundary review with STRIDE-style threat identification
-**Important limitation:** the repository currently contains no courses or grades API. The transcript page displays hard-coded sample grades in the browser. Threats involving real course/grade records are therefore future requirements, not implemented protections.
+**Important limitation:** academic records now have a backend API, but attendance, requests, inbox, and student-file APIs remain placeholders.
 
 ## 1. Project concept
 
-The project is a web-based university portal prototype. It is intended to let university users access academic and administrative services through role-protected accounts. The current implementation demonstrates login, a student dashboard, password changes, and administrator user management. The academic pages are placeholders or use local sample data.
+The project is a web-based university portal prototype. It is intended to let university users access academic and administrative services through role-protected accounts. The current implementation demonstrates login, a student dashboard, transcript data from the grades API, password changes, administrator user management, and academic-record management. Other academic pages are placeholders or use local sample data.
 
 ## 2. Team responsibilities
 
@@ -22,8 +22,8 @@ The roster uses the role labels supplied by the team; member names can be added 
 ### Components
 
 - **Browser client:** React 19, TypeScript, Ant Design, and React Router. Vite serves the development UI. The client calls the API using `VITE_API_URL`, defaulting to `http://localhost:5001/api`.
-- **API server:** Node.js and Express. It validates selected request bodies and query parameters with Zod, applies Passport JWT authentication to protected routes, and uses role middleware for administrator routes.
-- **Database:** MongoDB accessed through Mongoose. Current models are users and generic products.
+- **API server:** Node.js and Express. It validates selected request bodies and query parameters with Zod, applies Passport JWT authentication to protected routes, and uses role middleware for administrator and teacher routes.
+- **Database:** MongoDB accessed through Mongoose. Current models are users, generic products, courses, and grades.
 - **Optional object storage:** S3-compatible storage helper configured by environment variables. No current user-facing route was found that demonstrates its use.
 - **Optional error notification:** the API can send production error details to a configured Telegram chat. This is a sensitive external data flow and must be limited and reviewed.
 
@@ -31,7 +31,7 @@ The roster uses the role labels supplied by the team; member names can be added 
 
 ```mermaid
 flowchart LR
-    U[Student or administrator] -->|HTTPS in a deployed setup; HTTP on local dev| B[React browser client]
+    U[Student, teacher or administrator] -->|HTTPS in a deployed setup; HTTP on local dev| B[React browser client]
     B -->|JSON API requests; Bearer JWT for protected routes| A[Express API]
     A -->|Mongoose queries| DB[(MongoDB)]
     A -. optional configured error notification .-> TG[Telegram Bot API]
@@ -47,6 +47,15 @@ flowchart LR
 5. Protected API requests send the JWT as a Bearer token. Passport validates the token and checks the user's token version and active record.
 6. Administrator routes additionally check the user's role. Logout increments token version, invalidating previously issued tokens.
 
+### Academic records flow
+
+1. An administrator creates courses and assigns an optional teacher account.
+2. An administrator assigns a grade to a student, course, and semester.
+3. A student calls `GET /api/grades/me`; the API derives the student identity from the JWT and returns only that student's records.
+4. A teacher calls `GET /api/grades/teacher`; the API returns only grades for courses where the course's `teacher` field matches the authenticated teacher.
+5. `GET /api/grades/:id` permits an administrator, the owning student, or the assigned teacher. Other callers receive `404` so the API does not reveal whether the record exists.
+6. Course and grade creation, updates, and deletion remain administrator-only. Teacher grade submission is not implemented.
+
 ## 4. Data assets and trust boundaries
 
 | Asset | Current location | Security need |
@@ -54,7 +63,7 @@ flowchart LR
 | Password hashes and account records | MongoDB | Confidentiality, integrity, and restricted administrator access |
 | JWT signing secret | Backend environment | Confidentiality and integrity |
 | JWT access token | Browser storage and API requests | Confidentiality and integrity; protect against theft and replay |
-| Student profile and academic records | User model exists; real grades/courses are not implemented | Confidentiality and record-level authorization before real records are added |
+| Student profile and academic records | User, Course, and Grade models are implemented | Confidentiality, integrity, and record-level authorization; students must never read another student's grades |
 | Temporary administrator/student passwords | Seed command output or one-time API response | Confidentiality and short-lived use |
 | S3 credentials and stored files | Environment and optional S3-compatible service | Confidentiality, integrity, and access control |
 | Operational error details | Server logs and optional Telegram notification | Minimize sensitive content and restrict access |
@@ -67,10 +76,10 @@ Trust boundaries exist between the user's browser and API, the API and MongoDB, 
 |---|---|---|---|---|
 | T1 | Stolen or guessed credentials (Spoofing) | High | Passwords are stored as salted scrypt hashes; login returns a generic invalid-credentials message. | No login throttling or lockout was found. Add rate limiting and monitor repeated failures. |
 | T2 | Theft or replay of a valid JWT (Spoofing / Information disclosure) | High | JWT has an expiry; token version supports revocation on logout and password change. | Browser storage is accessible to injected JavaScript. Reduce XSS exposure, consider an HttpOnly secure cookie design, and use HTTPS in deployment. |
-| T3 | Student accesses another student's grades (Information disclosure / Elevation of privilege) | High once real grades exist | No grades API or grade database exists today; transcript rows are static demo data. | Do not treat UI hiding as protection. When the API is added, derive student identity from the authenticated server-side user and enforce record ownership on every request. Add negative authorization tests. |
-| T4 | Student or teacher performs administrator actions (Elevation of privilege) | High | User-management routes use `requireAdmin`; roles are stored in the database and validated against the allowed enum. | The role enum includes Student, Teacher, Admin, Staff, and User. Only user-management routes explicitly enforce Admin; no teacher-specific routes or permissions exist yet. Define least-privilege teacher policy before academic APIs are added; audit admin role/status changes. |
-| T5 | Unauthorized access to products or future private data (Information disclosure) | Medium | Create, update, and delete product routes require an administrator. | Product listing route is currently public. Confirm whether products are intended to be public; protect it if data is private. Future academic routes need authentication and ownership checks. |
-| T6 | Malformed input causes data corruption or unexpected behavior (Tampering) | Medium | Zod validators cover login, user-management, and product inputs. Multer is on 2.4.x and the upload helper sets finite file and field limits. | Review all route schemas and add boundary tests. The Express JSON body limit is 50 MB, which is unnecessarily high for ordinary API JSON. |
+| T3 | Student accesses another student's grades (Information disclosure / Elevation of privilege) | High | `/api/grades/me` derives the student from the authenticated JWT; `/api/grades/:id` verifies ownership; teacher access is limited to assigned courses. Negative authorization tests cover student-to-student and teacher-to-other-course access. | Do not treat UI hiding as protection. Add equivalent ownership checks to attendance, requests, and file APIs before those records exist. |
+| T4 | Student or teacher performs administrator actions (Elevation of privilege) | High | User-management and grade-management routes use `requireAdmin`. The teacher grade endpoint is read-only and filtered to courses assigned to the authenticated teacher. | The role enum includes Student, Teacher, Admin, Staff, and User. Teacher grade submission is not implemented; keep it read-only until an audit trail and least-privilege policy are added. Audit admin role/status and grade changes. |
+| T5 | Unauthorized access to products or private academic data (Information disclosure) | Medium | Create, update, and delete product routes require an administrator; course listing requires authentication; grade routes enforce role and record ownership. | Product listing route is currently public. Confirm whether products are intended to be public; protect it if data is private. |
+| T6 | Malformed input causes data corruption or unexpected behavior (Tampering) | Medium | Zod validators cover login, user-management, product, course, and grade inputs. Multer is on 2.4.x and the upload helper sets finite file and field limits. | Review all route schemas and add boundary tests. The Express JSON body limit is 50 MB, which is unnecessarily high for ordinary API JSON. |
 | T7 | Secret committed to Git or exposed to frontend (Information disclosure) | High | Root ignore rules exclude `.env`; `.env.example` is present; production checks require a 32-byte JWT secret. | Gitleaks passed on the first GitHub run. The development sample key is intentionally weak and must never be used in production. Rotate any credential found in history. |
 | T8 | Sensitive information leaked in logs or error responses (Information disclosure / Repudiation) | Medium | Production error responses hide generic internal errors; optional Telegram alerts are disabled unless configured. | Telegram receives error stack details when configured. Review redaction and access; add structured audit events for login and admin actions without logging credentials or tokens. |
 | T9 | Denial of service through repeated requests or large payloads (Denial of service) | Medium | JSON parsing has a size cap. Multer limits uploads to 20 MB per file, 5 files, 30 fields, and bounded nesting/index values. | No API rate limiting was found; the current 50 MB JSON body limit is high. Add route-sensitive rate limits and lower JSON payload limits. |
@@ -94,12 +103,12 @@ Risk ratings are initial qualitative priorities for this project and should be r
 5. Production traffic must use HTTPS, and production secrets must be unique and strong.
 6. CI must block pull requests on required build, test, and security checks.
 7. Authentication and administrator actions should be auditable without recording passwords, tokens, or sensitive academic values.
-8. Before the portal handles real grades or files, implement backend models/routes, per-record authorization, and tests for both allowed and denied access.
+8. Academic records now have backend models/routes, per-record authorization, and allowed/denied tests. Apply the same pattern to attendance, requests, and files before those records are added.
 
 ## 7. Known scope gaps
 
-- The backend defines Student, Teacher, Admin, Staff, and User roles, but teacher-specific routes and permissions are not implemented.
-- The backend currently defines users and generic products; courses, grades, attendance, requests, and inbox APIs are absent.
-- The transcript uses hard-coded sample rows, so it does not demonstrate server-side grade privacy.
-- Attendance, inbox, and student-files screens are empty placeholders.
+- The backend defines Student, Teacher, Admin, Staff, and User roles. Teacher access is currently read-only and limited to grades for assigned courses; teacher grade submission is not implemented.
+- Courses and grades now have backend APIs. Attendance, requests, inbox, and student-file APIs are still absent.
+- The transcript page reads `/api/grades/me`, which demonstrates server-side grade privacy. The profile page reads `/api/users/me`.
+- Requests, attendance, inbox, and student-files screens remain placeholders or use local sample data.
 - CI runs backend unit tests, frontend lint/build, dependency audits, Semgrep SAST, and Gitleaks secret scanning. After feature-branch pushes were removed as a separate trigger, all six PR checks passed on `469746e`. GitHub's review API showed approval by `eskendir2006` on that head. `main` requires a pull request, one approval, an up-to-date branch, and all six checks, and dismisses stale approvals. The team chose local demonstration for now; production deployment and runtime controls are absent.
